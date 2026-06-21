@@ -1,0 +1,299 @@
+{
+  "info": {
+    "name": "نظام حجز الرحلات — Bus Trip Booking API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection كاملة لـ API نظام حجز الرحلات بين المحافظات"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000", "type": "string" },
+    { "key": "userToken", "value": "", "type": "string" },
+    { "key": "adminToken", "value": "", "type": "string" },
+    { "key": "tripId", "value": "", "type": "string" },
+    { "key": "bookingId", "value": "", "type": "string" },
+    { "key": "userId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [{ "listen": "test", "script": { "exec": ["const r = pm.response.json(); if(r.data?.token) pm.collectionVariables.set('userToken', r.data.token);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"محمد أحمد علي\",\n  \"phone\": \"01012345678\",\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\"\n}" }
+          }
+        },
+        {
+          "name": "Login (User)",
+          "event": [{ "listen": "test", "script": { "exec": ["const r = pm.response.json(); if(r.data?.token) pm.collectionVariables.set('userToken', r.data.token);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\"\n}" }
+          }
+        },
+        {
+          "name": "Login (Admin)",
+          "event": [{ "listen": "test", "script": { "exec": ["const r = pm.response.json(); if(r.data?.token) pm.collectionVariables.set('adminToken', r.data.token);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@trips.com\",\n  \"password\": \"Admin@123456\"\n}" }
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/auth/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }]
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/auth/update-profile",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"محمد أحمد محدث\",\n  \"phone\": \"01098765432\"\n}" }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/auth/change-password",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"currentPassword\": \"Password123\",\n  \"newPassword\": \"NewPassword456\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 Users (Admin)",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "", "disabled": true },
+                { "key": "role", "value": "user", "disabled": true },
+                { "key": "isActive", "value": "true", "disabled": true }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
+          }
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/{{userId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
+          }
+        },
+        {
+          "name": "Create User",
+          "event": [{ "listen": "test", "script": { "exec": ["const r = pm.response.json(); if(r.data?.user?._id) pm.collectionVariables.set('userId', r.data.user._id);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/users",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"أحمد خالد\",\n  \"phone\": \"01155667788\",\n  \"email\": \"ahmed@example.com\",\n  \"password\": \"Password123\",\n  \"role\": \"user\"\n}" }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/users/{{userId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"أحمد خالد محدث\",\n  \"isActive\": true\n}" }
+          }
+        },
+        {
+          "name": "Toggle User Status",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/users/{{userId}}/toggle-status",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/users/{{userId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🚌 Trips",
+      "item": [
+        {
+          "name": "Get All Trips (User)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trips?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trips"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "departureCity", "value": "القاهرة", "disabled": true },
+                { "key": "arrivalCity", "value": "الإسكندرية", "disabled": true },
+                { "key": "date", "value": "2026-07-15", "disabled": true }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }]
+          }
+        },
+        {
+          "name": "Get All Trips (Admin)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trips?page=1&limit=10&status=active",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trips"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "active" }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
+          }
+        },
+        {
+          "name": "Get Trip By ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/trips/{{tripId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }]
+          }
+        },
+        {
+          "name": "Create Trip (Admin)",
+          "event": [{ "listen": "test", "script": { "exec": ["const r = pm.response.json(); if(r.data?.trip?._id) pm.collectionVariables.set('tripId', r.data.trip._id);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/trips",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"departureCity\": \"القاهرة\",\n  \"arrivalCity\": \"الإسكندرية\",\n  \"departureDate\": \"2026-08-15\",\n  \"departureTime\": \"08:00\",\n  \"arrivalTime\": \"11:00\",\n  \"price\": 150,\n  \"totalSeats\": 40,\n  \"description\": \"رحلة مريحة مكيفة بين القاهرة والإسكندرية\"\n}" }
+          }
+        },
+        {
+          "name": "Update Trip (Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/trips/{{tripId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"price\": 175,\n  \"description\": \"رحلة مريحة محدثة\",\n  \"status\": \"active\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Trip (Admin)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/trips/{{tripId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎫 Bookings",
+      "item": [
+        {
+          "name": "Create Booking (User)",
+          "event": [{ "listen": "test", "script": { "exec": ["const r = pm.response.json(); if(r.data?.booking?._id) pm.collectionVariables.set('bookingId', r.data.booking._id);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/bookings",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tripId\": \"{{tripId}}\",\n  \"seats\": 2\n}" }
+          }
+        },
+        {
+          "name": "My Bookings (User)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/my-bookings?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "my-bookings"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "confirmed", "disabled": true }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }]
+          }
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/bookings/{{bookingId}}/cancel",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }]
+          }
+        },
+        {
+          "name": "Get All Bookings (Admin)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "confirmed", "disabled": true },
+                { "key": "tripId", "value": "", "disabled": true }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
+          }
+        },
+        {
+          "name": "Booking Stats (Admin)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/bookings/stats",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❤️ Health Check",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health"
+          }
+        }
+      ]
+    }
+  ]
+}
