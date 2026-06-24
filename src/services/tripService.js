@@ -48,7 +48,11 @@ const getTripById = async (id) => {
 };
 
 const createTrip = async (data, adminId) => {
-  return Trip.create({ ...data, createdBy: adminId });
+  return Trip.create({
+    ...data,
+    availableSeats: data.totalSeats,
+    createdBy: adminId,
+  });
 };
 
 const updateTrip = async (id, data) => {
