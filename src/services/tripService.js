@@ -44,6 +44,13 @@ const getAllTrips = async (query, isAdmin = false) => {
 const getTripById = async (id) => {
   const trip = await Trip.findById(id).populate('createdBy', 'fullName email');
   if (!trip) throw new AppError('الرحلة غير موجودة', 404);
+
+  // Fix legacy trips with NaN/null availableSeats — persist the correction
+  if (trip.availableSeats == null || isNaN(trip.availableSeats)) {
+    trip.availableSeats = trip.totalSeats;
+    await trip.save();
+  }
+
   return trip;
 };
 

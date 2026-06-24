@@ -53,8 +53,10 @@ const createBooking = async (userId, tripId, seats) => {
     if (trip.status !== 'active') throw new AppError('هذه الرحلة غير متاحة للحجز', 400);
     if (new Date(trip.departureDate) < new Date()) throw new AppError('لا يمكن الحجز على رحلة منتهية', 400);
 
-    // Fallback for trips where availableSeats was not initialized
-    if (trip.availableSeats == null) trip.availableSeats = trip.totalSeats;
+    // Fallback for trips where availableSeats is null, undefined, or NaN (legacy data)
+    if (trip.availableSeats == null || isNaN(trip.availableSeats)) {
+      trip.availableSeats = trip.totalSeats;
+    }
 
     if (trip.availableSeats < seats) {
       throw new AppError(`عدد المقاعد المتاحة (${trip.availableSeats}) أقل من المطلوب`, 400);
